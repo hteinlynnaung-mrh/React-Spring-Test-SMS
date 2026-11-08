@@ -1,0 +1,67 @@
+import type { DashboardData } from "../types";
+import { StatCard } from "../components/StatCard";
+import { GpaChart } from "../components/GpaChart";
+import { CompletionDonut } from "../components/CompletionDonut";
+import { CurrentAssignments } from "../components/CurrentAssignments";
+import { ActivitySchedule, UpcomingEvents } from "../components/DashboardPanels";
+import { Icon } from "../components/Icon";
+
+interface Props {
+  data: DashboardData;
+  onNavigateStudents: () => void;
+  onRefresh?: () => void;
+}
+
+export function DashboardPage({ data, onNavigateStudents, onRefresh }: Props) {
+  return (
+    <div className="dashboard">
+      {/* KPI row */}
+      <div className="stat-grid">
+        <StatCard data={data.courseProgress} tone="yellow" icon="flame" />
+        <StatCard data={data.attendanceRate} tone="pink" icon="students" />
+        <StatCard data={data.assignments} tone="purple" icon="report" />
+      </div>
+
+      {/* Middle row: GPA + donut, right rail */}
+      <div className="dash-middle">
+        <div className="dash-left">
+          <div className="dash-middle-row">
+            <section className="card panel gpa-panel">
+              <header className="panel-head">
+                <h3>Average GPA</h3>
+                <div className="panel-head-right">
+                  <span className="legend-item">
+                    <span className="legend-dot" style={{ background: "#5B6270" }} /> Past
+                  </span>
+                  <span className="legend-item">
+                    <span className="legend-dot" style={{ background: "#E9848A" }} /> Recent
+                  </span>
+                  <button className="ghost-btn">
+                    January <Icon name="chevronDown" size={12} />
+                  </button>
+                </div>
+              </header>
+              <GpaChart days={data.gpaDays} currentGpa={data.currentGpa} />
+            </section>
+
+            <section className="card panel donut-panel">
+              <h3 className="donut-title">Assignment Completion</h3>
+              <CompletionDonut summary={data.assignmentSummary} />
+            </section>
+          </div>
+
+          <ActivitySchedule activities={data.activities} />
+        </div>
+
+        <div className="dash-right">
+          <CurrentAssignments assignments={data.currentAssignments} onChanged={onRefresh} />
+          <UpcomingEvents events={data.events} />
+        </div>
+      </div>
+
+      <button className="fab" onClick={onNavigateStudents} title="Manage students">
+        <Icon name="plus" size={20} /> Students
+      </button>
+    </div>
+  );
+}
