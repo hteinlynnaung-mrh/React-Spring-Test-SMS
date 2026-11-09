@@ -7,12 +7,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import tools.jackson.core.type.TypeReference;
-import tools.jackson.databind.ObjectMapper;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,8 +19,6 @@ import java.util.concurrent.ConcurrentHashMap;
 @RequestMapping("/api/attendance")
 public class AttendanceController {
 
-    private static final Path STORE_PATH = Path.of("data", "attendance.json");
-
     private static final Set<String> VALID_STATUSES = Set.of(
             AttendanceRecord.PRESENT,
             AttendanceRecord.ABSENT,
@@ -34,28 +27,9 @@ public class AttendanceController {
 
     private final StudentRepository studentRepository;
     private final Map<String, String> overrides = new ConcurrentHashMap<>();
-    private final ObjectMapper mapper = new ObjectMapper();
 
     public AttendanceController(StudentRepository studentRepository) {
         this.studentRepository = studentRepository;
-        loadFromDisk();
-    }
-
-    private void loadFromDisk() {
-        if (!Files.exists(STORE_PATH)) return;
-        try {
-            Map<String, String> loaded = mapper.readValue(STORE_PATH.toFile(), new TypeReference<>() {});
-            if (loaded != null) overrides.putAll(loaded);
-        } catch (Exception ignored) {
-        }
-    }
-
-    private synchronized void saveToDisk() {
-        try {
-            Files.createDirectories(STORE_PATH.getParent());
-            mapper.writerWithDefaultPrettyPrinter().writeValue(STORE_PATH.toFile(), overrides);
-        } catch (IOException ignored) {
-        }
     }
 
     private static String key(long studentId, LocalDate day) {
@@ -118,7 +92,6 @@ public class AttendanceController {
             throw new IllegalArgumentException("status must be one of " + VALID_STATUSES);
         }
         overrides.put(key(student.id(), day), status);
-        saveToDisk();
         return new AttendanceRecord(
                 student.id(),
                 student.id(),

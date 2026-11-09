@@ -3,12 +3,7 @@ package com.example.demo.repository;
 import com.example.demo.controller.DashboardData.AssignmentItem;
 import com.example.demo.controller.DashboardData.AssignmentSummary;
 import org.springframework.stereotype.Repository;
-import tools.jackson.core.type.TypeReference;
-import tools.jackson.databind.ObjectMapper;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
@@ -18,48 +13,16 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 @Repository
 public class AssignmentRepository {
 
-    private static final Path STORE_PATH = Path.of("data", "assignments.json");
-
     private final Map<Long, AssignmentItem> assignments = new ConcurrentHashMap<>();
     private final AtomicLong nextId = new AtomicLong(1);
-    private final ObjectMapper mapper = new ObjectMapper();
 
     public AssignmentRepository() {
-        if (!loadFromDisk()) {
-            seed();
-            saveToDisk();
-        }
-    }
-
-    private boolean loadFromDisk() {
-        if (!Files.exists(STORE_PATH)) return false;
-        try {
-            List<AssignmentItem> loaded = mapper.readValue(STORE_PATH.toFile(), new TypeReference<>() {});
-            if (loaded == null || loaded.isEmpty()) return false;
-            long maxId = 0;
-            for (AssignmentItem a : loaded) {
-                if (a.id() != null) {
-                    assignments.put(a.id(), a);
-                    if (a.id() > maxId) maxId = a.id();
-                }
-            }
-            nextId.set(maxId + 1);
-            return !assignments.isEmpty();
-        } catch (Exception ignored) {
-            return false;
-        }
-    }
-
-    private synchronized void saveToDisk() {
-        try {
-            Files.createDirectories(STORE_PATH.getParent());
-            mapper.writerWithDefaultPrettyPrinter().writeValue(STORE_PATH.toFile(), findAll());
-        } catch (IOException ignored) {
-        }
+        seed();
     }
 
     private void seed() {
@@ -91,7 +54,7 @@ public class AssignmentRepository {
     public List<AssignmentItem> findAll() {
         return assignments.values().stream()
                 .sorted(Comparator.comparing(AssignmentItem::dueISO).thenComparing(AssignmentItem::id))
-                .toList();
+                .collect(Collectors.toList());
     }
 
     public AssignmentSummary summary() {
@@ -106,22 +69,17 @@ public class AssignmentRepository {
         long id = nextId.getAndIncrement();
         AssignmentItem saved = new AssignmentItem(id, item.title(), item.subject(), item.dueISO(), item.dueTime(), item.status());
         assignments.put(id, saved);
-        saveToDisk();
         return saved;
     }
 
     public Optional<AssignmentItem> updateStatus(long id, String status) {
-        Optional<AssignmentItem> updated = Optional.ofNullable(assignments.computeIfPresent(id, (k, existing) ->
+        return Optional.ofNullable(assignments.computeIfPresent(id, (k, existing) ->
                 new AssignmentItem(id, existing.title(), existing.subject(), existing.dueISO(), existing.dueTime(), status)
         ));
-        if (updated.isPresent()) saveToDisk();
-        return updated;
     }
 
     public boolean delete(long id) {
-        boolean removed = assignments.remove(id) != null;
-        if (removed) saveToDisk();
-        return removed;
+        return assignments.remove(id) != null;
     }
 }
 

@@ -9,13 +9,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-import tools.jackson.core.type.TypeReference;
-import tools.jackson.databind.ObjectMapper;
 
-import java.io.IOException;
 import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
@@ -23,57 +18,25 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/announcements")
 public class AnnouncementController {
 
-    private static final Path STORE_PATH = Path.of("data", "announcements.json");
-
     private final Map<Long, Announcement> announcements = new ConcurrentHashMap<>();
     private final AtomicLong nextId = new AtomicLong(1);
-    private final ObjectMapper mapper = new ObjectMapper();
 
     public AnnouncementController() {
-        if (!loadFromDisk()) {
-            seed("Registration Week",
-                    "Course registration for the new term is open until Friday. Meet your advisor to confirm your class list.",
-                    "Administration", LocalDate.now().toString(), "ALL STUDENTS");
-            seed("Art & Design Exhibition",
-                    "Final-year Art & Design projects will be exhibited in Hall B. Families are welcome.",
-                    "Mr. Kyaw", LocalDate.now().minusDays(2).toString(), "ART & DESIGN");
-            seed("GPA Support Workshops",
-                    "Free after-school workshops for anyone below a 2.8 GPA. Sign up at the counseling office.",
-                    "Counseling Dept.", LocalDate.now().minusDays(4).toString(), "GRADES 9-12");
-            saveToDisk();
-        }
-    }
-
-    private boolean loadFromDisk() {
-        if (!Files.exists(STORE_PATH)) return false;
-        try {
-            List<Announcement> loaded = mapper.readValue(STORE_PATH.toFile(), new TypeReference<>() {});
-            if (loaded == null || loaded.isEmpty()) return false;
-            long maxId = 0;
-            for (Announcement a : loaded) {
-                if (a.id() != null) {
-                    announcements.put(a.id(), a);
-                    if (a.id() > maxId) maxId = a.id();
-                }
-            }
-            nextId.set(maxId + 1);
-            return !announcements.isEmpty();
-        } catch (Exception ignored) {
-            return false;
-        }
-    }
-
-    private synchronized void saveToDisk() {
-        try {
-            Files.createDirectories(STORE_PATH.getParent());
-            mapper.writerWithDefaultPrettyPrinter().writeValue(STORE_PATH.toFile(), list());
-        } catch (IOException ignored) {
-        }
+        seed("Registration Week",
+                "Course registration for the new term is open until Friday. Meet your advisor to confirm your class list.",
+                "Administration", LocalDate.now().toString(), "ALL STUDENTS");
+        seed("Art & Design Exhibition",
+                "Final-year Art & Design projects will be exhibited in Hall B. Families are welcome.",
+                "Mr. Kyaw", LocalDate.now().minusDays(2).toString(), "ART & DESIGN");
+        seed("GPA Support Workshops",
+                "Free after-school workshops for anyone below a 2.8 GPA. Sign up at the counseling office.",
+                "Counseling Dept.", LocalDate.now().minusDays(4).toString(), "GRADES 9-12");
     }
 
     private void seed(String title, String body, String author, String date, String audience) {
@@ -86,7 +49,7 @@ public class AnnouncementController {
         return announcements.values().stream()
                 .sorted(Comparator.comparing(Announcement::date).reversed()
                         .thenComparing(Announcement::id, Comparator.reverseOrder()))
-                .toList();
+                .collect(Collectors.toList());
     }
 
     @GetMapping("/{id}")
@@ -103,7 +66,7 @@ public class AnnouncementController {
         if (announcement.body() == null || announcement.body().isBlank()) {
             throw new IllegalArgumentException("body is required");
         }
-        long id = nextId.getAndIncrement();
+        Long id = nextId.getAndIncrement();
         Announcement created = new Announcement(
                 id,
                 announcement.title().trim(),
@@ -115,7 +78,6 @@ public class AnnouncementController {
                         ? "ALL STUDENTS" : announcement.audience().trim()
         );
         announcements.put(id, created);
-        saveToDisk();
         URI location = Objects.requireNonNull(
                 ServletUriComponentsBuilder.fromCurrentRequest()
                         .path("/{id}")
@@ -128,7 +90,6 @@ public class AnnouncementController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Map<String, Object>> delete(@PathVariable long id) {
         boolean removed = announcements.remove(id) != null;
-        if (removed) saveToDisk();
         return removed
                 ? ResponseEntity.ok(Map.of("deleted", true, "id", id))
                 : ResponseEntity.notFound().build();

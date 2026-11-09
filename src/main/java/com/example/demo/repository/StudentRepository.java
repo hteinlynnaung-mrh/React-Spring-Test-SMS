@@ -2,12 +2,7 @@ package com.example.demo.repository;
 
 import com.example.demo.model.Student;
 import org.springframework.stereotype.Repository;
-import tools.jackson.core.type.TypeReference;
-import tools.jackson.databind.ObjectMapper;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -18,44 +13,11 @@ import java.util.stream.Collectors;
 @Repository
 public class StudentRepository {
 
-    private static final Path STORE_PATH = Path.of("data", "students.json");
-
     private final Map<Long, Student> students = new ConcurrentHashMap<>();
     private final AtomicLong nextId = new AtomicLong(1);
-    private final ObjectMapper mapper = new ObjectMapper();
 
     public StudentRepository() {
-        if (!loadFromDisk()) {
-            seed();
-            saveToDisk();
-        }
-    }
-
-    private boolean loadFromDisk() {
-        if (!Files.exists(STORE_PATH)) return false;
-        try {
-            List<Student> loaded = mapper.readValue(STORE_PATH.toFile(), new TypeReference<>() {});
-            if (loaded == null || loaded.isEmpty()) return false;
-            long maxId = 0;
-            for (Student s : loaded) {
-                if (s.id() != null) {
-                    students.put(s.id(), s);
-                    if (s.id() > maxId) maxId = s.id();
-                }
-            }
-            nextId.set(maxId + 1);
-            return !students.isEmpty();
-        } catch (Exception ignored) {
-            return false;
-        }
-    }
-
-    private synchronized void saveToDisk() {
-        try {
-            Files.createDirectories(STORE_PATH.getParent());
-            mapper.writerWithDefaultPrettyPrinter().writeValue(STORE_PATH.toFile(), findAll());
-        } catch (IOException ignored) {
-        }
+        seed();
     }
 
     /** Pre-populate the store so the dashboard has realistic data on first boot. */
@@ -109,23 +71,18 @@ public class StudentRepository {
                 student.phone(), student.course(), student.gradeLevel(), student.gpa(),
                 student.attendanceRate(), student.status(), student.enrolledDate());
         students.put(id, saved);
-        saveToDisk();
         return saved;
     }
 
     public Optional<Student> update(long id, Student updated) {
-        Optional<Student> res = Optional.ofNullable(students.computeIfPresent(id, (key, existing) ->
+        return Optional.ofNullable(students.computeIfPresent(id, (key, existing) ->
                 new Student(id, updated.firstName(), updated.lastName(), updated.email(),
                         updated.phone(), updated.course(), updated.gradeLevel(), updated.gpa(),
                         updated.attendanceRate(), updated.status(), updated.enrolledDate())
         ));
-        if (res.isPresent()) saveToDisk();
-        return res;
     }
 
     public boolean delete(long id) {
-        boolean removed = students.remove(id) != null;
-        if (removed) saveToDisk();
-        return removed;
+        return students.remove(id) != null;
     }
 }
