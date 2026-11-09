@@ -1,6 +1,6 @@
 # Scholarly — Student Management System Specification (`SPEC.md`)
 
-**Scholarly** is a full-stack Student Management System built with a **Spring Boot 4.1.2 (Java 24)** REST backend and a **React 19 + TypeScript + Vite 8** frontend.
+**Scholarly** is a full-stack Student Management System built with a **Spring Boot 4.1.2 (Java 25)** REST backend and a **React 19 + TypeScript + Vite 8** frontend.
 
 ---
 
@@ -8,11 +8,12 @@
 
 ```text
 Student Management System/
-├── pom.xml                                  # Maven build configuration (Spring Boot 4.1.2, Java 24)
+├── pom.xml                                  # Maven build configuration (Spring Boot 4.1.2, Java 25)
 ├── data/                                    # Local JSON persistence store (git-ignored)
 │   ├── students.json                        # Persisted student roster
 │   ├── announcements.json                   # Persisted school-wide announcements
-│   └── attendance.json                      # Persisted attendance status overrides
+│   ├── attendance.json                      # Persisted attendance status overrides
+│   └── assignments.json                     # Persisted assignment list
 ├── src/
 │   ├── main/
 │   │   ├── java/com/example/demo/
@@ -22,11 +23,13 @@ Student Management System/
 │   │   │   ├── model/
 │   │   │   │   └── Student.java             # Student record model (id, name, email, course, GPA, etc.)
 │   │   │   ├── repository/
-│   │   │   │   └── StudentRepository.java   # Thread-safe student store backed by data/students.json
+│   │   │   │   ├── StudentRepository.java      # Thread-safe student store backed by data/students.json
+│   │   │   │   └── AssignmentRepository.java   # Thread-safe assignment store backed by data/assignments.json
 │   │   │   └── controller/
 │   │   │       ├── StudentController.java      # CRUD + search endpoints (/api/students)
 │   │   │       ├── DashboardController.java    # Aggregated KPI & chart endpoint (/api/dashboard)
 │   │   │       ├── DashboardData.java          # DTO records for dashboard widgets
+│   │   │       ├── AssignmentController.java   # Assignments CRUD + status updates (/api/assignments)
 │   │   │       ├── AttendanceController.java   # Attendance list, summary & marking (/api/attendance)
 │   │   │       ├── AttendanceRecord.java       # Attendance record DTO
 │   │   │       ├── AnnouncementController.java # Announcements CRUD (/api/announcements)
@@ -87,18 +90,23 @@ Student Management System/
 | `GET` | `/api/announcements/{id}` | Fetch a single announcement by ID |
 | `POST` | `/api/announcements` | Validate and post a new announcement (`201 Created`) |
 | `DELETE` | `/api/announcements/{id}` | Remove an announcement by ID |
+| `GET` | `/api/assignments` | List all assignments ordered by due date |
+| `POST` | `/api/assignments` | Validate and create an assignment (`201 Created`) |
+| `PUT` | `/api/assignments/{id}/status` | Update an assignment's status (`PENDING`, `COMPLETED`, `OVERDUE`) |
+| `DELETE` | `/api/assignments/{id}` | Remove an assignment by ID |
 
 ---
 
 ## 3. Present Work Plan (Completed & Active Capabilities)
 
 ### 3.1 Backend (Spring Boot 4)
-- [x] **Java 24 Alignment:** Configured `pom.xml` `<java.version>24</java.version>` so `./mvnw spring-boot:run` and `./mvnw test` work out of the box with the installed JDK 24 runtime.
+- [x] **Java 25 Alignment:** Configured `pom.xml` `<java.version>25</java.version>` so `./mvnw spring-boot:run` and `./mvnw test` work out of the box with the installed JDK 25 runtime (`~/.zshrc` exports `JAVA_HOME` via `/usr/libexec/java_home -v 25.0.2`).
 - [x] **Student Management CRUD & Search:** Full create, read, update, delete, and multi-field search (`fullName`, `email`, `course`, `gradeLevel`) in `StudentController` and `StudentRepository`.
-- [x] **Request Validation & Error Handling:** Server-side validation on student and announcement payloads (required fields, email format, grade range `1–12`, GPA range `0.0–4.0`, attendance `0–100%`, enum status, ISO dates) with `ApiExceptionHandler` returning structured `400 Bad Request` JSON responses.
+- [x] **Request Validation & Error Handling:** Server-side validation on student, assignment, and announcement payloads (required fields, email format, grade range `1–12`, GPA range `0.0–4.0`, attendance `0–100%`, enum status, ISO dates) with `ApiExceptionHandler` returning structured `400 Bad Request` JSON responses — including malformed or type-invalid request bodies, which never expose stack traces.
 - [x] **Interactive Attendance Marking:** `PUT /api/attendance` records per-student, per-day status overrides and updates the weekly summary calculation in real time.
 - [x] **Live Dashboard Aggregation:** `GET /api/dashboard` computes active student progress, average attendance rate, average GPA, and current-week GPA trend dates directly from the student roster.
-- [x] **Disk Persistence (`data/*.json`):** Students, announcements, and attendance overrides are automatically saved to `data/students.json`, `data/announcements.json`, and `data/attendance.json` so changes survive server restarts without requiring an external database server.
+- [x] **Disk Persistence (`data/*.json`):** Students, announcements, attendance overrides, and assignments are automatically saved to `data/students.json`, `data/announcements.json`, `data/attendance.json`, and `data/assignments.json` so changes survive server restarts without requiring an external database server.
+- [x] **Assignments CRUD API:** `GET/POST/DELETE /api/assignments` plus `PUT /api/assignments/{id}/status` with validation, persisted to `data/assignments.json` and feeding the dashboard donut, KPI card, and Current Assignments panel.
 
 ### 3.2 Frontend (React 19 + TypeScript + Vite)
 - [x] **Dashboard & Reporting Views:** Responsive KPI cards, interactive SVG Average GPA bar chart, Assignment Completion donut chart, Current Assignments week strip, Activities Schedule, Upcoming Events, and printable Report page (`window.print()`).
@@ -124,7 +132,7 @@ Student Management System/
   - **Student:** Read-only access to own profile, GPA history, attendance record, and assignment submissions.
 
 ### Phase 3 — Assignments, Courses & Grading Module
-- [ ] **Assignments CRUD API (`/api/assignments`):** Replace the static assignment list in `DashboardController` with a full CRUD resource (title, course, due date/time, status, student submissions) so the completion donut and KPI card reflect live assignment data.
+- [x] **Assignments CRUD API (`/api/assignments`):** Replaced the static assignment list in `DashboardController` with a full CRUD resource (title, course, due date/time, status) so the completion donut and KPI card reflect live assignment data. Student submissions remain future work.
 - [ ] **Courses & Enrollment:** Model courses, teachers, class schedules, and student-course enrollments (`ManyToMany`) so GPA is calculated from actual graded coursework.
 - [ ] **Activities & Events CRUD:** Add backend endpoints and UI modals to create, edit, and filter school activities and upcoming events.
 
@@ -137,4 +145,3 @@ Student Management System/
 - [ ] **Backend Integration Tests:** Add `@WebMvcTest` and `@SpringBootTest` suites covering `StudentController`, `AttendanceController`, `AnnouncementController`, and validation error cases (`400` / `404`).
 - [ ] **Frontend Component & E2E Tests:** Add Vitest + React Testing Library unit tests and Playwright end-to-end flows for student CRUD, attendance toggling, and sign-in/sign-out.
 - [ ] **Containerization & CI:** Provide a multi-stage `Dockerfile` and `docker-compose.yml` (Spring Boot API + Nginx/Vite frontend + PostgreSQL) and a GitHub Actions workflow running `./mvnw test`, `tsc -b`, and `oxlint` on every push.
-

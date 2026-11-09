@@ -96,9 +96,9 @@ export function AnnouncementsPage({ onCountChange }: { onCountChange?: (count: n
 
       {open && (
         <div className="modal-backdrop" onClick={() => setOpen(false)}>
-          <div className="modal" onClick={(e) => e.stopPropagation()}>
+          <div className="modal" role="dialog" aria-modal="true" aria-labelledby="announcement-modal-title" onClick={(e) => e.stopPropagation()}>
             <div className="modal-head">
-              <h3>New Announcement</h3>
+              <h3 id="announcement-modal-title">New Announcement</h3>
               <button className="icon-btn" onClick={() => setOpen(false)} aria-label="Close">
                 <Icon name="close" size={18} />
               </button>

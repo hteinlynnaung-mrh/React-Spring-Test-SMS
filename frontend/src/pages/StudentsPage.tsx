@@ -300,9 +300,9 @@ function SectionSlot({
   if (!visible) return null;
   return (
     <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal" onClick={(e) => e.stopPropagation()}>
+      <div className="modal" role="dialog" aria-modal="true" aria-labelledby="section-slot-title" onClick={(e) => e.stopPropagation()}>
         <div className="modal-head">
-          <h3>{title}</h3>
+          <h3 id="section-slot-title">{title}</h3>
           <button className="icon-btn" onClick={onClose} aria-label="Close">
             <Icon name="close" size={18} />
           </button>
