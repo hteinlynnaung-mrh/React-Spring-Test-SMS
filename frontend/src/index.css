@@ -701,6 +701,7 @@ h3 {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
   gap: 10px;
   margin-bottom: 12px;
 }
@@ -708,6 +709,7 @@ h3 {
 .panel-head-right {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 12px;
 }
 
@@ -814,6 +816,10 @@ h3 {
 }
 .activity-item:last-child {
   border-bottom: none;
+}
+
+.activity-main {
+  min-width: 0;
 }
 
 .activity-icon {
@@ -1199,7 +1205,7 @@ tbody tr:last-child td {
 /* announcements page */
 .announcement-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
   gap: 14px;
 }
 
@@ -1330,13 +1336,12 @@ tbody tr:last-child td {
   .dash-right {
     order: 2;
   }
-  .stat-grid {
-    grid-template-columns: 1fr;
-  }
 }
 
 @media (max-width: 880px) {
-  .stat-grid,
+  .stat-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
   .dash-middle-row {
     grid-template-columns: 1fr;
   }
@@ -1375,13 +1380,6 @@ tbody tr:last-child td {
     place-items: center;
     margin-top: auto;
   }
-  .activity-item {
-    grid-template-columns: 40px 1fr auto;
-  }
-  .activity-time,
-  .activity-status {
-    grid-column: 2;
-  }
 }
 
 @media (max-width: 700px) {
@@ -1391,8 +1389,15 @@ tbody tr:last-child td {
   .main {
     padding: 16px;
   }
+  .stat-grid {
+    grid-template-columns: 1fr;
+  }
   .form-grid {
     grid-template-columns: 1fr;
+  }
+  /* Keep the last panel clear of the floating action button. */
+  .dashboard {
+    padding-bottom: 58px;
   }
   .fab {
     display: inline-flex;
@@ -1407,5 +1412,40 @@ tbody tr:last-child td {
     box-shadow: var(--shadow);
     z-index: 30;
     align-items: center;
+  }
+}
+
+/* The 5-column activity row needs ~560px of content width; below that the
+   columns collide, so the row reflows into two lines: [icon + text + menu]
+   then [status + time]. */
+@media (max-width: 660px) {
+  .activity-item {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+  }
+  .activity-item > .activity-icon {
+    order: 1;
+    flex: none;
+  }
+  .activity-item > .activity-main {
+    order: 2;
+    /* Basis = container minus the kebab, so line 1 holds
+       [icon + text + menu] and status/time always wrap together to line 2. */
+    flex: 1 1 calc(100% - 140px);
+    min-width: 0;
+  }
+  .activity-item > .icon-btn {
+    order: 3;
+    flex: none;
+  }
+  .activity-item > .activity-status {
+    order: 4;
+    flex: none;
+  }
+  .activity-item > .activity-time {
+    order: 5;
+    flex: none;
   }
 }
