@@ -1,5 +1,6 @@
 import type { DashboardData } from "../types";
-import { StatCard } from "../components/StatCard";
+import type { PageKey } from "../components/Sidebar";
+import { StatCards } from "../components/StatCards";
 import { GpaChart } from "../components/GpaChart";
 import { CompletionDonut } from "../components/CompletionDonut";
 import { CurrentAssignments } from "../components/CurrentAssignments";
@@ -8,19 +9,15 @@ import { Icon } from "../components/Icon";
 
 interface Props {
   data: DashboardData;
-  onNavigateStudents: () => void;
+  onNavigate: (page: PageKey) => void;
   onRefresh?: () => void;
 }
 
-export function DashboardPage({ data, onNavigateStudents, onRefresh }: Props) {
+export function DashboardPage({ data, onNavigate, onRefresh }: Props) {
   return (
     <div className="dashboard">
       {/* KPI row */}
-      <div className="stat-grid">
-        <StatCard data={data.courseProgress} tone="yellow" icon="flame" />
-        <StatCard data={data.attendanceRate} tone="pink" icon="students" />
-        <StatCard data={data.assignments} tone="purple" icon="report" />
-      </div>
+      <StatCards data={data} onNavigate={onNavigate} />
 
       {/* Middle row: GPA + donut, right rail */}
       <div className="dash-middle">
@@ -59,7 +56,7 @@ export function DashboardPage({ data, onNavigateStudents, onRefresh }: Props) {
         </div>
       </div>
 
-      <button className="fab" onClick={onNavigateStudents} title="Manage students">
+      <button className="fab" onClick={() => onNavigate("students")} title="Manage students">
         <Icon name="plus" size={20} /> Students
       </button>
     </div>

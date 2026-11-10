@@ -1335,6 +1335,145 @@ tbody tr:last-child td {
   font-weight: 600;
 }
 
+/* --------------------------- stat card details ---------------------------- */
+.stat-card.is-clickable {
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.stat-card.is-clickable:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+}
+
+.stat-modal {
+  width: min(680px, 100%);
+}
+
+.stat-modal-hero {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 16px;
+}
+.stat-modal-hero .stat-delta {
+  background: var(--bg);
+}
+.stat-modal-hero .stat-sub {
+  margin-left: auto;
+}
+
+.stat-modal .summary-chips {
+  margin-bottom: 8px;
+}
+
+.detail-kpis {
+  display: grid;
+  /* 96px x6 + gaps fits the 680px dialog in one row; narrower screens wrap. */
+  grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+  gap: 10px;
+}
+.detail-kpi {
+  background: var(--bg);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+}
+.detail-kpi b {
+  display: block;
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+.detail-kpi span {
+  font-size: 11.5px;
+  color: var(--ink-soft);
+}
+
+.detail-scroll {
+  overflow-x: auto;
+  margin-top: 16px;
+}
+/* Overrides the global `table { min-width: 780px }` so tables fit the dialog. */
+.detail-table {
+  width: 100%;
+  min-width: 0;
+  border-collapse: collapse;
+}
+.detail-table td {
+  font-size: 13px;
+}
+
+.detail-group-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-faint);
+  margin: 18px 0 4px;
+}
+
+.detail-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.detail-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 2px;
+  border-bottom: 1px solid var(--line);
+}
+.detail-row:last-child {
+  border-bottom: none;
+}
+.detail-row .cell-title {
+  font-weight: 700;
+  font-size: 13.5px;
+}
+.detail-row .activity-status {
+  flex: none;
+}
+
+.detail-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 16px;
+}
+.detail-bar-row {
+  display: grid;
+  grid-template-columns: 92px minmax(0, 1fr) 40px;
+  align-items: center;
+  gap: 10px;
+  font-size: 12.5px;
+}
+.detail-bar-row b {
+  text-align: right;
+}
+.detail-bar {
+  height: 6px;
+  border-radius: 999px;
+  background: #eef0f4;
+  overflow: hidden;
+}
+.detail-bar > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+}
+
+.detail-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+
 /* The 5-column activity row needs ~594px of content width (558px of columns +
    36px of card padding); below that the columns collide, so the row reflows into
    two lines: [icon + text + menu] then [status + time]. The panels live in

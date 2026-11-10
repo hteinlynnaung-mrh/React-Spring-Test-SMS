@@ -150,7 +150,6 @@ export default function App() {
       .catch(() => undefined);
   }, [search, selectAccount]);
 
-  const navigateStudents = useCallback(() => navigate("students"), [navigate]);
   const signOut = useCallback(() => {
     setSignedOut(true);
     localStorage.setItem(STORAGE_SIGNED_OUT, "true");
@@ -231,14 +230,14 @@ export default function App() {
 
         {page === "dashboard" &&
           (dashboard ? (
-            <DashboardPage data={dashboard} onNavigateStudents={navigateStudents} onRefresh={loadDashboard} />
+            <DashboardPage data={dashboard} onNavigate={navigate} onRefresh={loadDashboard} />
           ) : (
             <EmptyState error={dashboardError} onRetry={loadDashboard} />
           ))}
 
         {page === "students" && <StudentsPage search={search} />}
         {page === "attendance" && <AttendancePage />}
-        {page === "report" && <ReportPage data={dashboard} />}
+        {page === "report" && <ReportPage data={dashboard} onNavigate={navigate} />}
         {page === "announcements" && <AnnouncementsPage onCountChange={setUnreadCount} />}
         {page === "help" && <HelpPage />}
         {page === "settings" && (

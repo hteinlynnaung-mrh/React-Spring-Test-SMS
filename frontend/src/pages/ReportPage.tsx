@@ -1,14 +1,16 @@
 import type { DashboardData } from "../types";
+import type { PageKey } from "../components/Sidebar";
 import { GpaChart } from "../components/GpaChart";
-import { StatCard } from "../components/StatCard";
+import { StatCards } from "../components/StatCards";
 import { Icon } from "../components/Icon";
 
 interface Props {
   data: DashboardData | null;
+  onNavigate: (page: PageKey) => void;
 }
 
 /** Report page reuses the dashboard widgets for a compact overview. */
-export function ReportPage({ data }: Props) {
+export function ReportPage({ data, onNavigate }: Props) {
   if (!data) return <p className="table-empty">Loading report…</p>;
 
   return (
@@ -23,11 +25,7 @@ export function ReportPage({ data }: Props) {
         </button>
       </div>
 
-      <div className="stat-grid">
-        <StatCard data={data.courseProgress} tone="yellow" icon="flame" />
-        <StatCard data={data.attendanceRate} tone="pink" icon="students" />
-        <StatCard data={data.assignments} tone="purple" icon="report" />
-      </div>
+      <StatCards data={data} onNavigate={onNavigate} />
 
       <div className="dash-middle-row">
         <section className="card panel gpa-panel">
