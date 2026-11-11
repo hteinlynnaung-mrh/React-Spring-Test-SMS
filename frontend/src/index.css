@@ -555,6 +555,58 @@ h3 {
   border-color: #d7dbe3;
 }
 
+/* ------------------------------ GPA month picker --------------------------- */
+.month-picker {
+  position: relative;
+  display: inline-flex;
+}
+.month-picker-btn[aria-expanded="true"] {
+  color: var(--ink);
+  border-color: #d7dbe3;
+}
+.month-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 30;
+  list-style: none;
+  margin: 0;
+  padding: 6px;
+  width: 170px;
+  /* Tall enough to list all 12 months without scrolling (with a viewport guard). */
+  max-height: min(460px, 75vh);
+  overflow-y: auto;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  box-shadow: 0 12px 32px rgba(23, 27, 38, 0.14);
+}
+.month-menu.is-flipped {
+  top: auto;
+  bottom: calc(100% + 8px);
+}
+.month-option {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+.month-option:hover {
+  background: var(--bg);
+  color: var(--ink);
+}
+.month-option.is-active {
+  background: #1f2432;
+  color: #fff;
+}
+
 .icon-btn {
   padding: 7px;
   border-radius: 10px;

@@ -48,6 +48,8 @@ export default function App() {
   const [search, setSearch] = useState("");
   const [dashboard, setDashboard] = useState<DashboardData | null>(null);
   const [dashboardError, setDashboardError] = useState<string | null>(null);
+  /** GPA-chart month (1–12); defaults to the current month, matches the backend. */
+  const [dashboardMonth, setDashboardMonth] = useState(() => new Date().getMonth() + 1);
   const [unreadCount, setUnreadCount] = useState(0);
   const [signedOut, setSignedOut] = useState(
     () => localStorage.getItem(STORAGE_SIGNED_OUT) === "true"
@@ -108,17 +110,19 @@ export default function App() {
     if (window.innerWidth <= 880) setSidebarOpen(false);
   }, []);
 
+  /* No parameters: it is also passed straight to <EmptyState onRetry={...}>,
+     which would otherwise hand it a MouseEvent. Month comes from state. */
   const loadDashboard = useCallback(() => {
     api
-      .getDashboard()
+      .getDashboard(dashboardMonth)
       .then((data) => {
         setDashboard(data);
         setDashboardError(null);
       })
       .catch((e) => setDashboardError(e instanceof Error ? e.message : "Failed to load dashboard"));
-  }, []);
+  }, [dashboardMonth]);
 
-  /* Load dashboard whenever it is relevant */
+  /* Load dashboard whenever it is relevant (or the picked month changes) */
   const needsDashboard = page === "dashboard" || page === "report";
   useEffect(() => {
     if (needsDashboard) loadDashboard();
@@ -230,7 +234,13 @@ export default function App() {
 
         {page === "dashboard" &&
           (dashboard ? (
-            <DashboardPage data={dashboard} onNavigate={navigate} onRefresh={loadDashboard} />
+            <DashboardPage
+              data={dashboard}
+              month={dashboardMonth}
+              onMonthChange={setDashboardMonth}
+              onNavigate={navigate}
+              onRefresh={loadDashboard}
+            />
           ) : (
             <EmptyState error={dashboardError} onRetry={loadDashboard} />
           ))}

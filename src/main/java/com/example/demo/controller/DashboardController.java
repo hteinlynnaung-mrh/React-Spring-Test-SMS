@@ -4,6 +4,7 @@ import com.example.demo.repository.AssignmentRepository;
 import com.example.demo.repository.StudentRepository;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
@@ -26,8 +27,14 @@ public class DashboardController {
         this.assignmentRepository = assignmentRepository;
     }
 
+    /**
+     * Aggregated dashboard payload.
+     *
+     * @param month optional GPA-chart month filter, {@code 1..12} (defaults to the
+     *              current month) — powers the month picker on the GPA panel.
+     */
     @GetMapping
-    public DashboardData dashboard() {
+    public DashboardData dashboard(@RequestParam(required = false) Integer month) {
         var students = studentRepository.findAll();
         int totalStudents = students.size();
         long activeCount = students.stream().filter(s -> "ACTIVE".equalsIgnoreCase(s.status())).count();
@@ -44,10 +51,16 @@ public class DashboardController {
                         "Based on " + totalStudents + " students");
 
         LocalDate today = LocalDate.now();
-        LocalDate monday = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+        int chartMonth = resolveMonth(month, today);
+        // Current month → this week's five weekdays; any other month → that month's
+        // first school week (Mon–Fri), so the chart always labels days inside the month.
+        LocalDate monday = chartMonth == today.getMonthValue()
+                ? today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
+                : LocalDate.of(today.getYear(), chartMonth, 1)
+                        .with(TemporalAdjusters.nextOrSame(DayOfWeek.MONDAY));
         DateTimeFormatter monthDay = DateTimeFormatter.ofPattern("LLL d", Locale.ENGLISH);
 
-        // Average GPA chart — current week's five weekdays, scaled around the live average GPA.
+        // Average GPA chart — five weekdays scaled around the live average GPA.
         double[] pastOffsets = {-1.1, 0.3, -0.9, -0.2, 0.1};
         double[] recentOffsets = {-0.6, 0.7, 0.1, -0.9, 0.5};
         List<DashboardData.GpaDay> gpaDays = new ArrayList<>(5);
@@ -94,5 +107,16 @@ public class DashboardController {
                 activities,
                 events
         );
+    }
+
+    /** Validates {@code ?month=1..12}; absent means the current month. */
+    private static int resolveMonth(Integer month, LocalDate today) {
+        if (month == null) {
+            return today.getMonthValue();
+        }
+        if (month < 1 || month > 12) {
+            throw new IllegalArgumentException("month must be between 1 and 12");
+        }
+        return month;
     }
 }

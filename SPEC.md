@@ -77,7 +77,7 @@ Student Management System/
 | Method | Endpoint | Description |
 | :--- | :--- | :--- |
 | `GET` | `/api/hello` | Health check returning `"Hello from Spring Boot!"` |
-| `GET` | `/api/dashboard` | Aggregated KPI cards, GPA trend (`gpaDays`), assignment summary, current assignments, activities & events |
+| `GET` | `/api/dashboard?month={1..12}` | Aggregated KPI cards, GPA trend (`gpaDays`) for the given month (optional, defaults to the current month; the trend shows that month's first school week), assignment summary, current assignments, activities & events |
 | `GET` | `/api/students?q={query}` | List all students (sorted by full name) or filter by name, email, course, or grade level |
 | `GET` | `/api/students/{id}` | Fetch a single student by ID (`404` if not found) |
 | `POST` | `/api/students` | Validate and create a student (`201 Created` with `Location` header) |
@@ -104,7 +104,7 @@ Student Management System/
 - [x] **Student Management CRUD & Search:** Full create, read, update, delete, and multi-field search (`fullName`, `email`, `course`, `gradeLevel`) in `StudentController` and `StudentRepository`.
 - [x] **Request Validation & Error Handling:** Server-side validation on student, assignment, and announcement payloads (required fields, email format, grade range `1–12`, GPA range `0.0–4.0`, attendance `0–100%`, enum status, ISO dates) with `ApiExceptionHandler` returning structured `400 Bad Request` JSON responses — including malformed or type-invalid request bodies, which never expose stack traces.
 - [x] **Interactive Attendance Marking:** `PUT /api/attendance` records per-student, per-day status overrides and updates the weekly summary calculation in real time.
-- [x] **Live Dashboard Aggregation:** `GET /api/dashboard` computes active student progress, average attendance rate, average GPA, and current-week GPA trend dates directly from the student roster.
+- [x] **Live Dashboard Aggregation:** `GET /api/dashboard` computes active student progress, average attendance rate, average GPA, and GPA trend dates (current week by default, or the first school week of any month via `?month=1..12`) directly from the student roster.
 - [x] **Disk Persistence (`data/*.json`):** Students, announcements, attendance overrides, and assignments are automatically saved to `data/students.json`, `data/announcements.json`, `data/attendance.json`, and `data/assignments.json` so changes survive server restarts without requiring an external database server.
 - [x] **Assignments CRUD API:** `GET/POST/DELETE /api/assignments` plus `PUT /api/assignments/{id}/status` with validation, persisted to `data/assignments.json` and feeding the dashboard donut, KPI card, and Current Assignments panel.
 

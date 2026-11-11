@@ -45,7 +45,9 @@ export const deleteStudent = (id: number) =>
 
 /* --------------------------------- dashboard --------------------------------- */
 
-export const getDashboard = () => request<DashboardData>("/dashboard");
+/** `month` filters the GPA chart to that calendar month (1–12); omit for the current month. */
+export const getDashboard = (month?: number) =>
+  request<DashboardData>(month && month >= 1 && month <= 12 ? `/dashboard?month=${month}` : "/dashboard");
 
 /* --------------------------------- attendance -------------------------------- */
 

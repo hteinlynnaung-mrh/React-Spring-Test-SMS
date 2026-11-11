@@ -2,6 +2,7 @@ import type { DashboardData } from "../types";
 import type { PageKey } from "../components/Sidebar";
 import { StatCards } from "../components/StatCards";
 import { GpaChart } from "../components/GpaChart";
+import { MonthPicker } from "../components/MonthPicker";
 import { CompletionDonut } from "../components/CompletionDonut";
 import { CurrentAssignments } from "../components/CurrentAssignments";
 import { ActivitySchedule, UpcomingEvents } from "../components/DashboardPanels";
@@ -9,11 +10,14 @@ import { Icon } from "../components/Icon";
 
 interface Props {
   data: DashboardData;
+  /** GPA chart month (1–12) and its setter — drives the panel's month dropdown. */
+  month: number;
+  onMonthChange: (month: number) => void;
   onNavigate: (page: PageKey) => void;
   onRefresh?: () => void;
 }
 
-export function DashboardPage({ data, onNavigate, onRefresh }: Props) {
+export function DashboardPage({ data, month, onMonthChange, onNavigate, onRefresh }: Props) {
   return (
     <div className="dashboard">
       {/* KPI row */}
@@ -33,9 +37,7 @@ export function DashboardPage({ data, onNavigate, onRefresh }: Props) {
                   <span className="legend-item">
                     <span className="legend-dot" style={{ background: "#E9848A" }} /> Recent
                   </span>
-                  <button className="ghost-btn">
-                    January <Icon name="chevronDown" size={12} />
-                  </button>
+                  <MonthPicker value={month} onChange={onMonthChange} />
                 </div>
               </header>
               <GpaChart days={data.gpaDays} currentGpa={data.currentGpa} />
