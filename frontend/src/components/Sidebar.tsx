@@ -12,6 +12,8 @@ export type PageKey =
 interface SidebarProps {
   page: PageKey;
   onNavigate: (page: PageKey) => void;
+  /** Opens the "add" flow for the page (Report → new assignment, Announcements → new post). */
+  onQuickAdd: (page: PageKey) => void;
   unreadCount: number;
   onSignOut: () => void;
 }
@@ -24,7 +26,13 @@ const MAIN_ITEMS: { key: PageKey; label: string; icon: string; badge?: boolean }
   { key: "announcements", label: "Announcements", icon: "announcements", badge: true },
 ];
 
-export function Sidebar({ page, onNavigate, unreadCount, onSignOut }: SidebarProps) {
+/** Tooltips/labels for the sidebar quick-add (+) buttons. */
+const ADD_LABEL: Partial<Record<PageKey, string>> = {
+  report: "New assignment",
+  announcements: "New announcement",
+};
+
+export function Sidebar({ page, onNavigate, onQuickAdd, unreadCount, onSignOut }: SidebarProps) {
   return (
     <aside className="sidebar">
       <div className="sidebar-brand">
@@ -40,15 +48,26 @@ export function Sidebar({ page, onNavigate, unreadCount, onSignOut }: SidebarPro
       <p className="sidebar-heading">Main Menu</p>
       <nav className="sidebar-nav">
         {MAIN_ITEMS.map((item) => (
-          <button
-            key={item.key}
-            className={`sidebar-item ${page === item.key ? "active" : ""}`}
-            onClick={() => onNavigate(item.key)}
-          >
-            <Icon name={item.icon} size={20} />
-            <span>{item.label}</span>
-            {item.badge && <em className="sidebar-plus">+</em>}
-          </button>
+          <div className="sidebar-row" key={item.key}>
+            <button
+              className={`sidebar-item ${page === item.key ? "active" : ""}`}
+              onClick={() => onNavigate(item.key)}
+            >
+              <Icon name={item.icon} size={20} />
+              <span>{item.label}</span>
+            </button>
+            {item.badge && (
+              <button
+                type="button"
+                className="sidebar-plus"
+                aria-label={ADD_LABEL[item.key]}
+                title={ADD_LABEL[item.key]}
+                onClick={() => onQuickAdd(item.key)}
+              >
+                +
+              </button>
+            )}
+          </div>
         ))}
       </nav>
 

@@ -104,11 +104,23 @@ export default function App() {
     return () => window.removeEventListener("resize", onResize);
   }, []);
 
+  /** Sidebar "+" → jump to the page and open its add dialog (controlled by the pages). */
+  const [quickAdd, setQuickAdd] = useState<PageKey | null>(null);
+
   const navigate = useCallback((key: PageKey) => {
     location.hash = `#/${key}`;
     setPage(key);
+    setQuickAdd(null); // leaving a page abandons any open add dialog
     if (window.innerWidth <= 880) setSidebarOpen(false);
   }, []);
+
+  const handleQuickAdd = useCallback(
+    (key: PageKey) => {
+      navigate(key);
+      setQuickAdd(key);
+    },
+    [navigate]
+  );
 
   /* No parameters: it is also passed straight to <EmptyState onRetry={...}>,
      which would otherwise hand it a MouseEvent. Month comes from state. */
@@ -215,7 +227,7 @@ export default function App() {
       {narrow && sidebarOpen && (
         <div className="drawer-backdrop" onClick={() => setSidebarOpen(false)} />
       )}
-      <Sidebar page={page} onNavigate={navigate} unreadCount={unreadCount} onSignOut={signOut} />
+      <Sidebar page={page} onNavigate={navigate} onQuickAdd={handleQuickAdd} unreadCount={unreadCount} onSignOut={signOut} />
 
       <main className="main">
         <Topbar
@@ -247,8 +259,22 @@ export default function App() {
 
         {page === "students" && <StudentsPage search={search} />}
         {page === "attendance" && <AttendancePage />}
-        {page === "report" && <ReportPage data={dashboard} onNavigate={navigate} />}
-        {page === "announcements" && <AnnouncementsPage onCountChange={setUnreadCount} />}
+        {page === "report" && (
+          <ReportPage
+            data={dashboard}
+            onNavigate={navigate}
+            onRefresh={loadDashboard}
+            addOpen={quickAdd === "report"}
+            onAddOpenChange={(open) => setQuickAdd(open ? "report" : null)}
+          />
+        )}
+        {page === "announcements" && (
+          <AnnouncementsPage
+            onCountChange={setUnreadCount}
+            addOpen={quickAdd === "announcements"}
+            onAddOpenChange={(open) => setQuickAdd(open ? "announcements" : null)}
+          />
+        )}
         {page === "help" && <HelpPage />}
         {page === "settings" && (
           <SettingsPage

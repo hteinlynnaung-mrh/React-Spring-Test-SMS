@@ -3,12 +3,18 @@ import * as api from "../api";
 import type { Announcement } from "../types";
 import { Icon } from "../components/Icon";
 
-export function AnnouncementsPage({ onCountChange }: { onCountChange?: (count: number) => void }) {
+interface Props {
+  onCountChange?: (count: number) => void;
+  /** New Announcement dialog — controlled so the sidebar "+" can open it. */
+  addOpen: boolean;
+  onAddOpenChange: (open: boolean) => void;
+}
+
+export function AnnouncementsPage({ onCountChange, addOpen, onAddOpenChange }: Props) {
   const [items, setItems] = useState<Announcement[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
-  const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ title: "", body: "", author: "Administration", audience: "ALL STUDENTS" });
   const [saving, setSaving] = useState(false);
 
@@ -38,7 +44,7 @@ export function AnnouncementsPage({ onCountChange }: { onCountChange?: (count: n
     try {
       await api.createAnnouncement(form);
       setForm({ title: "", body: "", author: "Administration", audience: "ALL STUDENTS" });
-      setOpen(false);
+      onAddOpenChange(false);
       await load();
     } catch (err) {
       setFormError(err instanceof Error ? err.message : "Save failed");
@@ -63,7 +69,7 @@ export function AnnouncementsPage({ onCountChange }: { onCountChange?: (count: n
           <h2>Announcements</h2>
           <p className="muted">School-wide news posted by staff and administration.</p>
         </div>
-        <button className="btn-dark" onClick={() => { setFormError(null); setOpen(true); }}>
+        <button className="btn-dark" onClick={() => { setFormError(null); onAddOpenChange(true); }}>
           <Icon name="plus" size={16} /> New Announcement
         </button>
       </div>
@@ -94,12 +100,12 @@ export function AnnouncementsPage({ onCountChange }: { onCountChange?: (count: n
         )}
       </div>
 
-      {open && (
-        <div className="modal-backdrop" onClick={() => setOpen(false)}>
+      {addOpen && (
+        <div className="modal-backdrop" onClick={() => onAddOpenChange(false)}>
           <div className="modal" role="dialog" aria-modal="true" aria-labelledby="announcement-modal-title" onClick={(e) => e.stopPropagation()}>
             <div className="modal-head">
               <h3 id="announcement-modal-title">New Announcement</h3>
-              <button className="icon-btn" onClick={() => setOpen(false)} aria-label="Close">
+              <button className="icon-btn" onClick={() => onAddOpenChange(false)} aria-label="Close">
                 <Icon name="close" size={18} />
               </button>
             </div>
@@ -122,7 +128,7 @@ export function AnnouncementsPage({ onCountChange }: { onCountChange?: (count: n
               </label>
               {formError && <p className="form-error" role="alert">{formError}</p>}
               <div className="form-actions">
-                <button type="button" className="btn-light" onClick={() => setOpen(false)}>Cancel</button>
+                <button type="button" className="btn-light" onClick={() => onAddOpenChange(false)}>Cancel</button>
                 <button type="submit" className="btn-dark" disabled={saving}>
                   {saving ? "Posting…" : "Post"}
                 </button>
