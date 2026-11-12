@@ -1,11 +1,8 @@
 import type { StatCard as StatCardType } from "../types";
 import { Icon } from "./Icon";
 
-const CARD_STYLES: Record<string, { bg: string; iconBg: string; badge: string }> = {
-  yellow: { bg: "#FAF4A5", iconBg: "rgba(0,0,0,.82)", badge: "#EDE98B" },
-  pink: { bg: "#FBD9DA", iconBg: "#1F2432", badge: "#F6C4C6" },
-  purple: { bg: "#E3DDFB", iconBg: "#1F2432", badge: "#D3CBF7" },
-};
+/* Card / icon / CTA colors live in CSS (`.tone-*` rules) so dark mode can
+   retheme them; inline styles would pin the pastels in both themes. */
 
 interface Props {
   data: StatCardType;
@@ -16,16 +13,14 @@ interface Props {
 }
 
 export function StatCard({ data, tone, icon, onDetails }: Props) {
-  const style = CARD_STYLES[tone];
   const up = data.delta >= 0;
   return (
     <article
-      className={onDetails ? "stat-card is-clickable" : "stat-card"}
-      style={{ background: style.bg }}
+      className={onDetails ? `stat-card tone-${tone} is-clickable` : `stat-card tone-${tone}`}
       onClick={onDetails}
     >
       <div className="stat-head">
-        <span className="stat-icon" style={{ background: style.iconBg }}>
+        <span className="stat-icon">
           <Icon name={icon} size={18} />
         </span>
         <span className="stat-title">{data.title}</span>
@@ -46,7 +41,6 @@ export function StatCard({ data, tone, icon, onDetails }: Props) {
         <p className="stat-sub">{data.subtitle}</p>
         <button
           className="stat-cta"
-          style={{ background: style.badge }}
           onClick={(e) => {
             e.stopPropagation();
             onDetails?.();

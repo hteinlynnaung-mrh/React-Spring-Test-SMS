@@ -60,9 +60,10 @@
 }
 
 /* ---------------------------------------------------------------------------
-   Dark mode — every surface/text token above flips here. The pastel accents
-   (yellow/pink/purple cards, chips, week strip) stay as they are; rules that
-   sit on those pastels pin their own dark ink so they read in both themes.
+   Dark mode — every surface/text token above flips here, including the pastel
+   accent tints (--yellow/--pink/--purple) used by the KPI cards, week strip
+   and event ratings; the "-deep" variants stay pastel so icon circles and CTA
+   badges keep an accented pop with dark ink.
 --------------------------------------------------------------------------- */
 [data-theme="dark"] {
   color-scheme: dark;
@@ -100,6 +101,10 @@
   --shadow-card: 0 16px 40px rgba(0, 0, 0, 0.45);
   /* scrims need to be darker over a dark page */
   --scrim: rgba(0, 0, 0, 0.6);
+  /* pastel accents flip to dark tints; "-deep" stays pastel for accents */
+  --yellow: #3b3421;
+  --pink: #3e2a2e;
+  --purple: #35314f;
 }
 
 * {
@@ -762,8 +767,8 @@ h3 {
   flex-direction: column;
   gap: 10px;
   min-width: 0;
-  /* Pinned ink: these cards stay pastel in dark mode, so their text must not flip. */
-  color: #1f2432;
+  /* Tone classes supply the pastel background; text follows the theme ink. */
+  color: var(--ink);
 }
 
 .stat-head {
@@ -833,6 +838,58 @@ h3 {
 }
 .stat-cta b {
   margin-left: 4px;
+}
+
+/* KPI card tones — light values sampled from the mockup. Dark variants live
+   in the [data-theme="dark"] section below. */
+.tone-yellow {
+  background: var(--yellow);
+}
+.tone-pink {
+  background: var(--pink);
+}
+.tone-purple {
+  background: var(--purple);
+}
+.tone-yellow .stat-icon {
+  background: rgba(0, 0, 0, 0.82);
+}
+.tone-pink .stat-icon,
+.tone-purple .stat-icon {
+  background: var(--dark);
+}
+.tone-yellow .stat-cta {
+  background: var(--yellow-deep);
+}
+.tone-pink .stat-cta {
+  background: var(--pink-deep);
+}
+.tone-purple .stat-cta {
+  background: var(--purple-deep);
+}
+
+/* dark variants: tinted cards, pastel icon circles + dark glyph, pastel CTA */
+[data-theme="dark"] .stat-icon {
+  color: var(--on-inverse);
+}
+[data-theme="dark"] .tone-yellow .stat-icon {
+  background: var(--yellow-deep);
+}
+[data-theme="dark"] .tone-pink .stat-icon {
+  background: var(--pink-deep);
+}
+[data-theme="dark"] .tone-purple .stat-icon {
+  background: var(--purple-deep);
+}
+[data-theme="dark"] .stat-cta {
+  /* pastel badge keeps dark ink so it reads on the light pill */
+  color: var(--on-inverse);
+}
+[data-theme="dark"] .stat-delta {
+  background: rgba(255, 255, 255, 0.14);
+}
+[data-theme="dark"] .stat-sub {
+  color: var(--ink-soft);
 }
 
 /* middle split */
@@ -1066,8 +1123,8 @@ h3 {
   align-items: center;
   gap: 2px;
   transition: background 0.15s, transform 0.1s;
-  /* Pink stays pastel in dark mode → keep dark ink. */
-  color: #1f2432;
+  /* Pink tinted pill; the tint (var(--pink)) flips in dark mode. */
+  color: var(--ink);
 }
 
 .week-day:hover {
@@ -1193,8 +1250,8 @@ h3 {
   padding: 4px 9px;
   display: inline-flex;
   align-items: center;
-  /* Yellow pill stays pastel → keep dark ink. */
-  color: #1f2432;
+  /* Yellow tinted pill; the tint (var(--yellow)) flips in dark mode. */
+  color: var(--ink);
   gap: 4px;
 }
 
