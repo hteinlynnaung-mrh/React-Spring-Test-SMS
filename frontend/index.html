@@ -13,6 +13,19 @@
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      // Apply the saved theme before the app mounts so the first paint is correct.
+      (function () {
+        var t = null;
+        try { t = localStorage.getItem("scholarly.theme"); } catch (e) {}
+        if (t !== "light" && t !== "dark") {
+          t = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches
+            ? "dark"
+            : "light";
+        }
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

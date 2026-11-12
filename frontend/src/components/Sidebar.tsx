@@ -39,7 +39,7 @@ export function Sidebar({ page, onNavigate, onQuickAdd, unreadCount, onSignOut }
         <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true">
           <path
             d="M12 2s5 4.5 5 9a5 5 0 0 1-10 0c0-1.5.5-3 1.5-4.5C9 9 12 7 12 2z"
-            fill="#1F2432"
+            fill="currentColor"
           />
         </svg>
         <span>Scholarly</span>

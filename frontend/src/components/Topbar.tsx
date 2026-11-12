@@ -15,6 +15,10 @@ interface TopbarProps {
   students?: Student[];
   onSelectStudent?: (student: Student) => void;
   onSignOut?: () => void;
+  /** Current color theme — drives which icon the toggle shows. */
+  theme?: "light" | "dark";
+  /** Flips light ↔ dark. */
+  onThemeToggle?: () => void;
 }
 
 export function Topbar({
@@ -29,6 +33,8 @@ export function Topbar({
   students = [],
   onSelectStudent,
   onSignOut,
+  theme = "light",
+  onThemeToggle,
 }: TopbarProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -67,6 +73,16 @@ export function Topbar({
       </div>
 
       <div className="topbar-right">
+        <button
+          type="button"
+          className="bell-button theme-toggle"
+          onClick={onThemeToggle}
+          aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+          title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+        >
+          <Icon name={theme === "dark" ? "sun" : "moon"} size={20} />
+        </button>
+
         <button className="bell-button" title="Notifications" onClick={onBellClick}>
           <Icon name="bell" size={20} />
           {unreadCount > 0 && <span className="bell-dot">{unreadCount}</span>}

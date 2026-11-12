@@ -60,9 +60,12 @@ export default function App() {
   const [userRole, setUserRole] = useState(
     () => localStorage.getItem(STORAGE_USER_ROLE) || "Student"
   );
-  const [theme, setTheme] = useState<"light" | "dark">(() =>
-    localStorage.getItem(STORAGE_THEME) === "dark" ? "dark" : "light"
-  );
+  const [theme, setTheme] = useState<"light" | "dark">(() => {
+    const stored = localStorage.getItem(STORAGE_THEME);
+    if (stored === "dark" || stored === "light") return stored;
+    // No explicit choice yet → follow the OS preference.
+    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  });
   const [startPage, setStartPage] = useState<PageKey>(savedStartPage);
   const [students, setStudents] = useState<Student[]>([]);
 
@@ -179,7 +182,7 @@ export default function App() {
             <svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true">
               <path
                 d="M12 2s5 4.5 5 9a5 5 0 0 1-10 0c0-1.5.5-3 1.5-4.5C9 9 12 7 12 2z"
-                fill="#1F2432"
+                fill="currentColor"
               />
             </svg>
             <span>Scholarly</span>
@@ -237,6 +240,8 @@ export default function App() {
           search={search}
           onSearchChange={setSearch}
           onMenuClick={() => setSidebarOpen((o) => !o)}
+          theme={theme}
+          onThemeToggle={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}
           unreadCount={unreadCount}
           onBellClick={() => navigate("announcements")}
           students={students}

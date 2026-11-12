@@ -32,7 +32,7 @@ export function DashboardPage({ data, month, onMonthChange, onNavigate, onRefres
                 <h3>Average GPA</h3>
                 <div className="panel-head-right">
                   <span className="legend-item">
-                    <span className="legend-dot" style={{ background: "#5B6270" }} /> Past
+                    <span className="legend-dot" style={{ background: "var(--chart-past)" }} /> Past
                   </span>
                   <span className="legend-item">
                     <span className="legend-dot" style={{ background: "#E9848A" }} /> Recent

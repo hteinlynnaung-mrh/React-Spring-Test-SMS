@@ -13,7 +13,7 @@ export function CompletionDonut({ summary }: { summary: AssignmentSummary }) {
   const [hover, setHover] = useState<string | null>(null);
 
   const segments: Segment[] = [
-    { label: "Completed", value: summary.completed, color: "#2E2E38" },
+    { label: "Completed", value: summary.completed, color: "var(--chart-ink)" },
     { label: "Pending", value: summary.pending, color: "#E9848A", hatch: true },
     { label: "Overdue", value: summary.overdue, color: "#FAF4A5" },
   ];
@@ -42,7 +42,6 @@ export function CompletionDonut({ summary }: { summary: AssignmentSummary }) {
               cy="100"
               r={R}
               fill="none"
-              stroke={seg.hatch ? "url(#donut-hatch)" : seg.color}
               strokeWidth={hover === seg.label ? 38 : 34}
               strokeDasharray={`${Math.max(dash - 3, 0.5)} ${C - dash + 3}`}
               strokeDashoffset={-offset}
@@ -50,7 +49,8 @@ export function CompletionDonut({ summary }: { summary: AssignmentSummary }) {
               strokeLinecap="butt"
               onMouseEnter={() => setHover(seg.label)}
               onMouseLeave={() => setHover(null)}
-              style={{ transition: "stroke-width .15s" }}
+              // stroke lives in style: var() is only valid in CSS, not SVG attributes.
+              style={{ transition: "stroke-width .15s", stroke: seg.color }}
             />
           );
           offset += dash;

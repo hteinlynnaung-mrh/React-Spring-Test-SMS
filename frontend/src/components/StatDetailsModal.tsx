@@ -324,7 +324,7 @@ function AssignmentsDetail({
 }) {
   const total = Math.max(1, summary.total);
   const segments = [
-    { key: "completed", label: "Completed", value: summary.completed, color: "#2E2E38" },
+    { key: "completed", label: "Completed", value: summary.completed, color: "var(--chart-ink)" },
     { key: "pending", label: "Pending", value: summary.pending, color: "#E9848A" },
     { key: "overdue", label: "Overdue", value: summary.overdue, color: "#EDE98B" },
   ];

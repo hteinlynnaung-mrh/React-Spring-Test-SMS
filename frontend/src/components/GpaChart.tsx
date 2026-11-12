@@ -41,7 +41,7 @@ export function GpaChart({ days, currentGpa }: { days: GpaDay[]; currentGpa: num
               x2={W - pad.right}
               y1={y(gradeValue)}
               y2={y(gradeValue)}
-              stroke={i === 0 ? "#E5E7EE" : "#F1F2F5"}
+              style={{ stroke: i === 0 ? "var(--chart-grid)" : "var(--chart-grid-soft)" }}
             />
             {i < 6 && GRADES[i] && (
               <text x={pad.left - 10} y={y(gradeValue) + 4} className="chart-label">
@@ -59,13 +59,13 @@ export function GpaChart({ days, currentGpa }: { days: GpaDay[]; currentGpa: num
         const active = highlighted === i;
         return (
           <g key={d.label} onMouseEnter={() => setHighlighted(i)} onMouseLeave={() => setHighlighted(null)}>
-            <rect x={pad.left + groupW * i} y={pad.top} width={groupW} height={chartH} fill={active ? "#FBFBFC" : "none"} />
+            <rect x={pad.left + groupW * i} y={pad.top} width={groupW} height={chartH} style={{ fill: active ? "var(--chart-hover)" : "none" }} />
             <rect
               x={pastX}
               y={y(d.past)}
               width={barW}
               height={pad.top + chartH - y(d.past)}
-              fill="#5B6270"
+              style={{ fill: "var(--chart-past)" }}
               rx={barW / 2}
             />
             <rect
@@ -91,7 +91,7 @@ export function GpaChart({ days, currentGpa }: { days: GpaDay[]; currentGpa: num
         x2={pad.left + groupW * peakIdx + groupW / 2 + 4}
         y1={y(currentGpa)}
         y2={y(currentGpa)}
-        stroke="#2E2E38"
+        style={{ stroke: "var(--chart-ink)" }}
         strokeDasharray="3 3"
       />
       <rect
@@ -100,13 +100,13 @@ export function GpaChart({ days, currentGpa }: { days: GpaDay[]; currentGpa: num
         rx={8}
         width={44}
         height={22}
-        fill="#2E2E38"
+        style={{ fill: "var(--chart-ink)" }}
       />
       <text
         x={pad.left + groupW * peakIdx + groupW / 2 + 28}
         y={y(currentGpa) + 4}
         textAnchor="middle"
-        fill="#fff"
+        style={{ fill: "var(--on-chart-ink)" }}
         fontSize="10"
         fontWeight={600}
       >
